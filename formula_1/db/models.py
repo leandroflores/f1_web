@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import date, datetime, UTC
 
 from formula_1.db import Base
 from formula_1.db.types import HashedStr, TZDateTime
@@ -129,3 +129,77 @@ class Session(Base):
     user: Mapped[User] = relationship(back_populates="session")
 
 
+class Season(Base):
+    __tablename__ = "seasons"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    year: Mapped[int]
+    rounds: Mapped[int]
+    created_at: Mapped[datetime] = mapped_column(
+        TZDateTime, default=lambda: datetime.now(UTC)
+    )
+
+    # reverses
+    races: Mapped[List["Race"]] = relationship(back_populates="season")
+
+class Constructor(Base):
+    __tablename__ = "constructors"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    identifier: Mapped[str]
+    name: Mapped[str]
+    nationality: Mapped[str]
+    url: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(
+        TZDateTime, default=lambda: datetime.now(UTC)
+    )
+
+class Circuit(Base):
+    __tablename__ = "circuits"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    city: Mapped[str]
+    country: Mapped[str]
+    url: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(
+        TZDateTime, default=lambda: datetime.now(UTC)
+    )
+
+    # reverses
+    races: Mapped[List["Race"]] = relationship(back_populates="circuit")
+
+class Driver(Base):
+    __tablename__ = "drivers"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    identifier: Mapped[str]
+    code: Mapped[str]
+    first_name: Mapped[str]
+    last_name: Mapped[str]
+    birth_date: Mapped[datetime]
+    country: Mapped[str]
+    url: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(
+        TZDateTime, default=lambda: datetime.now(UTC)
+    )
+
+class Race(Base):
+    __tablename__ = "races"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    date: Mapped[date]
+    round: Mapped[int]
+    created_at: Mapped[datetime] = mapped_column(
+        TZDateTime, default=lambda: datetime.now(UTC)
+    )
+    season_id: Mapped[int] = mapped_column(
+        ForeignKey("seasons.id"), index=True
+    )
+    circuit_id: Mapped[int] = mapped_column(
+        ForeignKey("circuits.id"), index=True
+    )
+
+    # relationships
+    season: Mapped[Season] = relationship(back_populates="races")
+    circuit: Mapped[Circuit] = relationship(back_populates="races")
