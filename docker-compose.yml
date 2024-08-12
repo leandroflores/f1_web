@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn formula_1.main:app --reload --workers 1 --host 0.0.0.0 --log-config=log_conf.yaml'
+    volumes:
+      - ./formula_1:/code/formula_1
+      - ./alembic:/code/alembic
+    ports:
+      - 8010:8000
+    depends_on:
+      - db
+  db:
+    image: postgis/postgis:16-3.4-alpine
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - 5402:5432
+    environment:
+      - POSTGRES_USER=formula1dev
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=formula1
+
+volumes:
+  postgres_data:
