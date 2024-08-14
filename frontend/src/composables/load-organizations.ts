@@ -53,3 +53,29 @@ export const useLoadOrganizations = () => {
     load,
   };
 };
+
+export const useLoadDrivers = () => {
+  const { showSnackbar } = useSnackbar();
+  const unexpectedError =
+    "Erro inesperado. Tente novamente ou entre em contato com o suporte.";
+  const loadingDrivers = ref(false);
+  const drivers = ref<any[]>([]);
+
+  async function load() {
+    try {
+      loadingDrivers.value = true;
+      const res = await axios.get("/drivers");
+      drivers.value = res.data;
+    } catch (err) {
+      showSnackbar(unexpectedError, "error");
+    } finally {
+      loadingDrivers.value = false;
+    }
+  }
+
+  return {
+    loadingDrivers: loadingDrivers,
+    drivers: drivers,
+    load,
+  };
+};

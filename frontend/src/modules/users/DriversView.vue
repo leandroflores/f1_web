@@ -21,93 +21,153 @@
 
       <template v-slot:createForm>
         <v-text-field
-          label="Nome"
-          name="name"
-          :error-messages="nameError"
-          v-model="createFormData.name"
+          label="Identificador"
+          name="identifier"
+          :error-messages="identifierError"
+          v-model="createFormData.identifier"
           validate-on="blur"
           :rules="[required]"
           autofocus
-          ref="nameInput"
+          ref="identifierInput"
         ></v-text-field>
-        <v-autocomplete
-          clearable
-          label="Organização"
-          auto-select-first
-          name="organization"
-          v-model="createFormData.organization_id"
-          autocomplete="off"
-          :items="organizations"
-          :loading="loadingOrganizations"
-          item-title="name"
-          item-value="id"
+        <v-text-field
+          label="Código"
+          name="code"
+          v-model="createFormData.code"
           validate-on="blur"
           :rules="[required]"
-        ></v-autocomplete>
-        <v-checkbox
-          label="Ativo"
-          name="is_active"
-          v-model="createFormData.is_active"
-          hide-details
-          single-line
-        ></v-checkbox>
+          autofocus
+        ></v-text-field>
+        <v-text-field
+          label="Nome"
+          name="first_name"
+          v-model="createFormData.first_name"
+          validate-on="blur"
+          :rules="[required]"
+          autofocus
+        ></v-text-field>
+        <v-text-field
+          label="Sobrenome"
+          name="last_name"
+          v-model="createFormData.last_name"
+          validate-on="blur"
+          :rules="[required]"
+          autofocus
+        ></v-text-field>
+        <v-text-field
+          label="Data de Nascimento"
+          name="birth_date"
+          v-model="createFormData.birth_date"
+          validate-on="blur"
+          :rules="[required]"
+          autofocus
+        ></v-text-field>
+        <v-text-field
+          label="Nacionalidade"
+          name="country"
+          v-model="createFormData.country"
+          validate-on="blur"
+          :rules="[required]"
+          autofocus
+        ></v-text-field>
+        <v-text-field
+          label="URL"
+          name="url"
+          v-model="createFormData.url"
+          validate-on="blur"
+          autofocus
+        ></v-text-field>
       </template>
 
       <template v-slot:editForm>
         <v-text-field
-          label="Nome"
-          name="name"
-          :error-messages="nameError"
-          v-model="editFormData.name"
+          label="Identificador"
+          name="identifier"
+          :error-messages="identifierError"
+          v-model="createFormData.identifier"
           validate-on="blur"
           :rules="[required]"
           autofocus
-          ref="nameInput"
+          ref="identifierInput"
         ></v-text-field>
-        <v-autocomplete
-          clearable
-          label="Organização"
-          auto-select-first
-          name="organization"
-          v-model="editFormData.organization_id"
-          autocomplete="off"
-          :items="organizations"
-          :loading="loadingOrganizations"
-          item-title="name"
-          item-value="id"
+        <v-text-field
+          label="Código"
+          name="code"
+          v-model="createFormData.code"
           validate-on="blur"
           :rules="[required]"
-        ></v-autocomplete>
-        <v-checkbox
-          label="Ativo"
-          name="is_active"
-          v-model="editFormData.is_active"
-          hide-details
-          single-line
-        ></v-checkbox>
+          autofocus
+        ></v-text-field>
+        <v-text-field
+          label="Nome"
+          name="first_name"
+          v-model="createFormData.first_name"
+          validate-on="blur"
+          :rules="[required]"
+          autofocus
+        ></v-text-field>
+        <v-text-field
+          label="Sobrenome"
+          name="last_name"
+          v-model="createFormData.last_name"
+          validate-on="blur"
+          :rules="[required]"
+          autofocus
+        ></v-text-field>
+        <v-text-field
+          label="Data de Nascimento"
+          name="birth_date"
+          v-model="createFormData.birth_date"
+          validate-on="blur"
+          :rules="[required]"
+          autofocus
+        ></v-text-field>
+        <v-text-field
+          label="Nacionalidade"
+          name="country"
+          v-model="createFormData.country"
+          validate-on="blur"
+          :rules="[required]"
+          autofocus
+        ></v-text-field>
+        <v-text-field
+          label="URL"
+          name="url"
+          v-model="createFormData.url"
+          validate-on="blur"
+          autofocus
+        ></v-text-field>
       </template>
     </CRUDTable>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import CRUDTable from "@/components/CRUDTable.vue";
-import { useLoadOrganizations } from "@/composables/load-organizations";
-import { localeDateTimeOptions } from "@/consts";
-import { required } from "@/validators";
-import { watchOnce } from "@vueuse/core";
 import { AxiosError } from "axios";
+import CRUDTable from "@/components/CRUDTable.vue";
+import { localeDateOptions } from "@/consts";
 import { reactive, ref } from "vue";
+import { required } from "@/validators";
+import { useLoadDrivers } from "@/composables/load-organizations";
+import { watchOnce } from "@vueuse/core";
 
 const defaultCreateFormData = {
-  name: "",
-  organization_id: undefined,
-  is_active: true,
+  identifier: "",
+  code: "",
+  first_name: "",
+  last_name: "",
+  birth_date: "",
+  country: "",
+  url: "",
 };
 const defaultEditFormData = {
-  name: "",
-  organization_id: undefined,
-  is_active: true,
+  identifier: "",
+  code: "",
+  first_name: "",
+  last_name: "",
+  birth_date: "",
+  country: "",
+  url: "",
 };
 const createFormData = reactive({ ...defaultCreateFormData });
 const editFormData = reactive({ ...defaultEditFormData });
@@ -125,7 +185,7 @@ const createConfig = {
   formIcon: "mdi-briefcase-plus",
   submitText: "Salvar",
   formDataDefault: defaultCreateFormData,
-  handleCreateError: checkExistingName,
+  handleCreateError: checkExistingIdentifier,
 };
 const editConfig = {
   btnText: "Editar Empresa",
@@ -133,7 +193,7 @@ const editConfig = {
   formIcon: "mdi-briefcase-edit",
   submitText: "Salvar",
   formDataDefault: defaultEditFormData,
-  handleEditError: checkExistingName,
+  handleEditError: checkExistingIdentifier,
 };
 
 const tableHeaders = [
@@ -154,8 +214,8 @@ const tableHeaders = [
     key: "country",
   },
   {
-    title: "Criação",
-    key: "created_at",
+    title: "Nascimento",
+    key: "birth_date",
   },
   {
     title: "Ações",
@@ -165,40 +225,36 @@ const tableHeaders = [
   },
 ];
 
-const nameError = ref("");
-const nameInput = ref();
-const existingNameMsg = "Empresa com este nome já existe";
+const identifierError = ref("");
+const identifierInput = ref();
+const existingNameMsg = "Piloto com este identificar já existe";
 
-function checkExistingName(err: AxiosError<any, any>) {
+function checkExistingIdentifier(err: AxiosError<any, any>) {
   if (err.response?.status === 409) {
-    nameError.value = existingNameMsg;
-    nameInput.value.focus();
+    identifierError.value = existingNameMsg;
+    identifierInput.value.focus();
     watchOnce(
-      () => createFormData.name || editFormData.name,
-      () => (nameError.value = "")
+      () => createFormData.identifier || editFormData.identifier,
+      () => (identifierError.value = "")
     );
     return true;
   }
   return false;
 }
 
-const {
-  organizations,
-  loadingOrganizations,
-  load: loadOrgs,
-} = useLoadOrganizations();
+const { drivers, loadingDrivers, load: loadDrivers } = useLoadDrivers();
 
-function driversProcess(companies: any[]) {
-  return companies.map((company) => {
-    company.created_at = new Date(company.created_at).toLocaleString(
+function driversProcess(drivers: any[]) {
+  return drivers.map((driver) => {
+    driver.birth_date = new Date(driver.birth_date).toLocaleString(
       undefined,
-      localeDateTimeOptions
+      localeDateOptions
     );
-    company.organization_id = company.organization?.id;
-    return company;
+    // driver.organization_id = driver.organization?.id;
+    return driver;
   });
 }
 async function loadAll() {
-  await Promise.all([loadOrgs()]);
+  await Promise.all([loadDrivers()]);
 }
 </script>

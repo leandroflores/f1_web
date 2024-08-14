@@ -17,7 +17,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     ports:
-      - 5402:5432
+      - 5403:5432
     environment:
       - POSTGRES_USER=formula1dev
       - POSTGRES_PASSWORD=123

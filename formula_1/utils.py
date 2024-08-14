@@ -50,12 +50,17 @@ def get_dict_value(data: dict, key: str) -> dict:
                 return result
     return {}
 
-
-def str_to_date(value: str) -> datetime:
+def time_in_ms(value: str) -> None:
     try:
-        return datetime.strptime(value, "%d/%m/%Y")
+        return float(value)
     except Exception:
-        return datetime.now()
+        return float("inf")
+
+def str_to_date(value: str) -> date:
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except Exception:
+        return None
 
 def date_to_br_format(date: str) -> str:
     try:

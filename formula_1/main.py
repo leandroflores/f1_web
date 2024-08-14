@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from formula_1.db import create_admin_user
 from formula_1.features import (
     companies,
+    drivers,
     organizations,
     users,
 )
@@ -42,6 +43,7 @@ app.mount(
 )
 
 app.include_router(companies.router)
+app.include_router(drivers.router)
 app.include_router(organizations.router)
 app.include_router(users.router)
 

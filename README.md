@@ -8,4 +8,14 @@ Rodar o seguinte comando:
 docker-compose build
 ```
 
-Iniciar o Banco de Dados postgres
+Iniciar o Banco de Dados postgres:
+
+```shell
+docker-compose exec web bash
+```
+
+E rodar o seguinte comando:
+
+```shell
+alembic upgrade head
+```

@@ -2,11 +2,12 @@ from datetime import date, datetime, UTC
 
 from formula_1.db import Base
 from formula_1.db.types import HashedStr, TZDateTime
-from formula_1.utils import Hash, str_to_date
+from formula_1.utils import Hash, str_to_date, time_in_ms
 
 from sqlalchemy import (
     Column,
     ForeignKey,
+    JSON,
     Table,
 )
 from sqlalchemy.orm import (
@@ -149,10 +150,23 @@ class Constructor(Base):
     identifier: Mapped[str]
     name: Mapped[str]
     nationality: Mapped[str]
-    url: Mapped[str]
+    url: Mapped[Optional[str]]
+    data: Mapped[dict] = mapped_column(type_=JSON)
     created_at: Mapped[datetime] = mapped_column(
         TZDateTime, default=lambda: datetime.now(UTC)
     )
+
+    # reverses
+    positions: Mapped[List["RacePosition"]] = relationship(back_populates="constructor")
+
+    @staticmethod
+    def from_dict(adict: dict) -> "Constructor":
+        constructor: Constructor = Constructor()
+        constructor.identifier = adict.get("constructorId", None)
+        constructor.name = adict.get("name", None)
+        constructor.nationality = adict.get("nationality", None)
+        constructor.url = adict.get("url", None)
+        return constructor
 
 class Circuit(Base):
     __tablename__ = "circuits"
@@ -161,13 +175,23 @@ class Circuit(Base):
     name: Mapped[str]
     city: Mapped[str]
     country: Mapped[str]
-    url: Mapped[str]
+    url: Mapped[Optional[str]]
+    data: Mapped[dict] = mapped_column(type_=JSON)
     created_at: Mapped[datetime] = mapped_column(
         TZDateTime, default=lambda: datetime.now(UTC)
     )
 
     # reverses
     races: Mapped[List["Race"]] = relationship(back_populates="circuit")
+
+    @staticmethod
+    def from_dict(adict: dict) -> "Circuit":
+        circuit: Circuit = Circuit()
+        circuit.name = adict.get("circuitName", None)
+        circuit.city = adict.get("Location", {}).get("locality", None)
+        circuit.country = adict.get("Location", {}).get("country", None)
+        circuit.url = adict.get("url", None)
+        return circuit
 
 class Driver(Base):
     __tablename__ = "drivers"
@@ -177,12 +201,16 @@ class Driver(Base):
     code: Mapped[str]
     first_name: Mapped[str]
     last_name: Mapped[str]
-    birth_date: Mapped[datetime]
+    birth_date: Mapped[Optional[date]]
     country: Mapped[str]
-    url: Mapped[str]
+    url: Mapped[Optional[str]]
+    data: Mapped[dict] = mapped_column(type_=JSON)
     created_at: Mapped[datetime] = mapped_column(
         TZDateTime, default=lambda: datetime.now(UTC)
     )
+
+    # reverses
+    positions: Mapped[List["RacePosition"]] = relationship(back_populates="driver")
 
     @staticmethod
     def from_dict(adict: dict) -> "Driver":
@@ -200,8 +228,9 @@ class Race(Base):
     __tablename__ = "races"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    date: Mapped[date]
+    date: Mapped[Optional[date]]
     round: Mapped[int]
+    data: Mapped[dict] = mapped_column(type_=JSON)
     created_at: Mapped[datetime] = mapped_column(
         TZDateTime, default=lambda: datetime.now(UTC)
     )
@@ -215,3 +244,50 @@ class Race(Base):
     # relationships
     season: Mapped[Season] = relationship(back_populates="races")
     circuit: Mapped[Circuit] = relationship(back_populates="races")
+    positions: Mapped[List["RacePosition"]] = relationship(back_populates="race")
+
+    @staticmethod
+    def from_dict(adict: dict) -> "Race":
+        race: Race = Race()
+        race.date = str_to_date(adict.get("date", None))
+        race.round = int(adict.get("round", 0))
+        return race
+
+class RacePosition(Base):
+    __tablename__ = "race_positions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    grid: Mapped[int]
+    position: Mapped[int]
+    points: Mapped[Optional[int]]
+    time: Mapped[Optional[str]]
+    time_in_ms: Mapped[Optional[float]]
+    status: Mapped[str]
+    data: Mapped[dict] = mapped_column(type_=JSON)
+    
+    race_id: Mapped[int] = mapped_column(
+        ForeignKey("races.id"), index=True
+    )
+    constructor_id: Mapped[int] = mapped_column(
+        ForeignKey("constructors.id"), index=True
+    )
+    driver_id: Mapped[int] = mapped_column(
+        ForeignKey("drivers.id"), index=True
+    )
+
+    # relationships
+    race: Mapped[Race] = relationship(back_populates="positions")
+    constructor: Mapped[Constructor] = relationship(back_populates="positions")
+    driver: Mapped[Driver] = relationship(back_populates="positions")
+
+    @staticmethod
+    def from_dict(adict: dict) -> "RacePosition":
+        position: RacePosition = RacePosition()
+        position.grid = int(adict.get("grid", 0))
+        position.position = int(adict.get("position", 0))
+        position.points = int(adict.get("points", 0))
+        position.time = adict.get("Time", {}).get("time", "")
+        position.time_in_ms = time_in_ms(adict.get("Time", {}).get("millis", ""))
+        position.status = adict.get("status", "")
+        return position
+

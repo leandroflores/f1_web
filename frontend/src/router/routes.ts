@@ -2,9 +2,11 @@ import { RouteRecordRaw } from "vue-router";
 import LoginView from "@/modules/users/LoginView.vue";
 import NavbarView from "@/components/NavbarView.vue";
 import AdminHomeView from "@/modules/admin/AdminHomeView.vue";
-import UsersView from "@/modules/users/UsersView.vue";
+
 import CompaniesView from "@/modules/users/CompaniesView.vue";
+import DriversView from "@/modules/users/DriversView.vue";
 import OrganizationsView from "@/modules/users/OrganizationsView.vue";
+import UsersView from "@/modules/users/UsersView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -35,6 +37,14 @@ const routes: Array<RouteRecordRaw> = [
         component: CompaniesView,
         meta: {
           title: "Empresas | Formula 1",
+        },
+      },
+      {
+        path: "pilotos",
+        name: "drivers",
+        component: DriversView,
+        meta: {
+          title: "Pilotos | Formula 1",
         },
       },
     ],

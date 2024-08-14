@@ -10,4 +10,10 @@ const localeDateTimeOptions = {
   minute: "2-digit",
 } as const;
 
-export { dateTimeFormat, dateFormat, localeDateTimeOptions };
+const localeDateOptions = {
+  month: "2-digit",
+  day: "2-digit",
+  year: "numeric",
+} as const;
+
+export { dateTimeFormat, dateFormat, localeDateOptions, localeDateTimeOptions };

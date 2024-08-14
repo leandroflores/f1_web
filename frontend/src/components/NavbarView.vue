@@ -23,6 +23,15 @@
     <v-list nav>
       <v-list-item
         v-if="store.userMe?.is_admin"
+        prepend-icon="mdi-dialpad"
+        title="Pilotos"
+        value="drivers"
+        @click="$router.push({ name: 'drivers' })"
+        active-color="primary"
+      >
+      </v-list-item>
+      <v-list-item
+        v-if="store.userMe?.is_admin"
         prepend-icon="mdi-badge-account-horizontal"
         title="Empresas"
         value="companies"
