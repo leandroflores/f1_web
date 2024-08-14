@@ -2,7 +2,7 @@ from datetime import date, datetime, UTC
 
 from formula_1.db import Base
 from formula_1.db.types import HashedStr, TZDateTime
-from formula_1.utils import Hash
+from formula_1.utils import Hash, str_to_date
 
 from sqlalchemy import (
     Column,
@@ -183,6 +183,18 @@ class Driver(Base):
     created_at: Mapped[datetime] = mapped_column(
         TZDateTime, default=lambda: datetime.now(UTC)
     )
+
+    @staticmethod
+    def from_dict(adict: dict) -> "Driver":
+        driver: Driver = Driver()
+        driver.identifier = adict.get("driverId", None)
+        driver.code = adict.get("code", None)
+        driver.first_name = adict.get("givenName", None)
+        driver.last_name = adict.get("familyName", None)
+        driver.birth_date = str_to_date(adict.get("dateOfBirth", None))
+        driver.country = adict.get("nationality", None)
+        driver.url = adict.get("url", None)
+        return driver
 
 class Race(Base):
     __tablename__ = "races"

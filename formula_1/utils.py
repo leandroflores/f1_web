@@ -1,7 +1,7 @@
 import re
 import unicodedata
 
-from datetime import datetime
+from datetime import date, datetime
 from passlib.context import CryptContext
 
 
@@ -50,6 +50,12 @@ def get_dict_value(data: dict, key: str) -> dict:
                 return result
     return {}
 
+
+def str_to_date(value: str) -> datetime:
+    try:
+        return datetime.strptime(value, "%d/%m/%Y")
+    except Exception:
+        return datetime.now()
 
 def date_to_br_format(date: str) -> str:
     try:

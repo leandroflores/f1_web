@@ -12,10 +12,6 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 engine = create_engine(settings.database_url)
 
-print("A" * 50)
-print(settings.database_url)
-print("A" * 50)
-
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 convention = {

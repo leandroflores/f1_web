@@ -84,6 +84,10 @@ def create_organization(
         **data.model_dump(exclude=["organization_id"]),
     )
 
+    print("0" * 50)
+    print("Create Organization")
+    print("0" * 50)
+
     try:
         db.add(new_organization)
         db.commit()
