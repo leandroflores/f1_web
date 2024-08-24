@@ -25,7 +25,6 @@ def create_races_files(year: int, rounds: int) -> bool:
 
 def create_season_file(year: int) -> bool:
     try:
-        print("Teste")
         folder_path: str = f"data/{year}"
         if not os.path.isdir(folder_path):
             os.makedirs(folder_path)
@@ -38,7 +37,7 @@ def create_season_file(year: int) -> bool:
             if not os.path.isfile(path):
                with open(path, "w") as file:
                     file.write(json.dumps(data))
-
+            
             create_races_files(year, total)
             create_circuit_file(year)
             create_driver_file(year)
