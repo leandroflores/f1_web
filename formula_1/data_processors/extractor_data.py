@@ -25,6 +25,7 @@ def create_races_files(year: int, rounds: int) -> bool:
 
 def create_season_file(year: int) -> bool:
     try:
+        print("Teste")
         folder_path: str = f"data/{year}"
         if not os.path.isdir(folder_path):
             os.makedirs(folder_path)
@@ -70,7 +71,7 @@ def create_constructor_file(year: int) -> bool:
     _create_file(year, "constructor")
     
 
-years: list[int] = [2008]
+years: list[int] = [2017]
 for year in years:
     print(year)
     print(create_season_file(year))
