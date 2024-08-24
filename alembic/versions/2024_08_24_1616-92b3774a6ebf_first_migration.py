@@ -1,8 +1,8 @@
-"""Added Formula 1 structs
+"""First migration
 
-Revision ID: 6cc21f181509
-Revises: be620f1a28c1
-Create Date: 2024-08-14 16:27:36.655753
+Revision ID: 92b3774a6ebf
+Revises: 
+Create Date: 2024-08-24 16:16:11.738442
 
 """
 from typing import Sequence, Union
@@ -13,8 +13,8 @@ from formula_1.db import types as custom_types
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6cc21f181509'
-down_revision: Union[str, None] = 'be620f1a28c1'
+revision: str = '92b3774a6ebf'
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -54,6 +54,14 @@ def upgrade() -> None:
     sa.Column('created_at', custom_types.TZDateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_drivers'))
     )
+    op.create_table('organizations',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('created_at', custom_types.TZDateTime(), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_organizations')),
+    sa.UniqueConstraint('name', name=op.f('uq_organizations_name'))
+    )
     op.create_table('seasons',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('year', sa.Integer(), nullable=False),
@@ -61,6 +69,17 @@ def upgrade() -> None:
     sa.Column('created_at', custom_types.TZDateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_seasons'))
     )
+    op.create_table('companies',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('organization_id', sa.Integer(), nullable=False),
+    sa.Column('created_at', custom_types.TZDateTime(), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], name=op.f('fk_companies_organization_id_organizations')),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_companies')),
+    sa.UniqueConstraint('name', name=op.f('uq_companies_name'))
+    )
+    op.create_index(op.f('ix_companies_organization_id'), 'companies', ['organization_id'], unique=False)
     op.create_table('races',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('date', sa.Date(), nullable=True),
@@ -75,6 +94,31 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_races_circuit_id'), 'races', ['circuit_id'], unique=False)
     op.create_index(op.f('ix_races_season_id'), 'races', ['season_id'], unique=False)
+    op.create_table('users',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('email', sa.String(), nullable=False),
+    sa.Column('password', custom_types.HashedStr(), nullable=False),
+    sa.Column('full_name', sa.String(), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('is_admin', sa.Boolean(), nullable=False),
+    sa.Column('is_master', sa.Boolean(), nullable=False),
+    sa.Column('created_at', custom_types.TZDateTime(), nullable=True),
+    sa.Column('organization_id', sa.Integer(), nullable=False),
+    sa.Column('created_by_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], name=op.f('fk_users_created_by_id_users')),
+    sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], name=op.f('fk_users_organization_id_organizations')),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_users')),
+    sa.UniqueConstraint('email', name=op.f('uq_users_email'))
+    )
+    op.create_index(op.f('ix_users_created_by_id'), 'users', ['created_by_id'], unique=False)
+    op.create_index(op.f('ix_users_organization_id'), 'users', ['organization_id'], unique=False)
+    op.create_table('company_user',
+    sa.Column('company_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['company_id'], ['companies.id'], name=op.f('fk_company_user_company_id_companies')),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_company_user_user_id_users')),
+    sa.PrimaryKeyConstraint('company_id', 'user_id', name=op.f('pk_company_user'))
+    )
     op.create_table('race_positions',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('grid', sa.Integer(), nullable=False),
@@ -95,19 +139,39 @@ def upgrade() -> None:
     op.create_index(op.f('ix_race_positions_constructor_id'), 'race_positions', ['constructor_id'], unique=False)
     op.create_index(op.f('ix_race_positions_driver_id'), 'race_positions', ['driver_id'], unique=False)
     op.create_index(op.f('ix_race_positions_race_id'), 'race_positions', ['race_id'], unique=False)
+    op.create_table('sessions',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('session_id', sa.String(), nullable=False),
+    sa.Column('created_at', custom_types.TZDateTime(), nullable=False),
+    sa.Column('expires_at', custom_types.TZDateTime(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_sessions_user_id_users')),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_sessions')),
+    sa.UniqueConstraint('session_id', name=op.f('uq_sessions_session_id'))
+    )
+    op.create_index(op.f('ix_sessions_user_id'), 'sessions', ['user_id'], unique=True)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_sessions_user_id'), table_name='sessions')
+    op.drop_table('sessions')
     op.drop_index(op.f('ix_race_positions_race_id'), table_name='race_positions')
     op.drop_index(op.f('ix_race_positions_driver_id'), table_name='race_positions')
     op.drop_index(op.f('ix_race_positions_constructor_id'), table_name='race_positions')
     op.drop_table('race_positions')
+    op.drop_table('company_user')
+    op.drop_index(op.f('ix_users_organization_id'), table_name='users')
+    op.drop_index(op.f('ix_users_created_by_id'), table_name='users')
+    op.drop_table('users')
     op.drop_index(op.f('ix_races_season_id'), table_name='races')
     op.drop_index(op.f('ix_races_circuit_id'), table_name='races')
     op.drop_table('races')
+    op.drop_index(op.f('ix_companies_organization_id'), table_name='companies')
+    op.drop_table('companies')
     op.drop_table('seasons')
+    op.drop_table('organizations')
     op.drop_table('drivers')
     op.drop_table('constructors')
     op.drop_table('circuits')
